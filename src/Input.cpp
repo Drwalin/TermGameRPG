@@ -2,7 +2,7 @@
 
 #include "../include/Input.hpp"
 
-void UpdateComponentInput(ComponentInput &comp)
+void SystemInput(ComponentInput &comp)
 {
 	comp.character = getch();
 	if (comp.character == ERR) {

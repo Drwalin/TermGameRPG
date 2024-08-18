@@ -9,16 +9,31 @@
 
 #include <flecs.h>
 
-#include "EntityComponents.hpp"
+#include "Components.hpp"
 #include "TickTimer.hpp"
+
+class World;
+
+struct WorldPtr
+{
+	World *world;
+};
 
 class World
 {
 public:
 	void Initialize();
 	void InitializeWindows();
+	void InitializeLogicSystems();
+	void SpawnWorld();
 	void OneEpoch();
 	void Render();
+	
+	template<typename Fun, typename ...Args>
+	auto _System(const char *name, Fun &&func, std::function<void(flecs::entity, Args...)> f)
+	{
+		return ecs.system<Args...>(name).each(std::move(func));
+	}
 	
 	template<typename Fun, typename ...Args>
 	auto _System(const char *name, Fun &&func, std::function<void(Args...)> f)
@@ -33,7 +48,15 @@ public:
 	}
 	
 public:
+	EntityId GetBlockingEntityId(ComponentCollision &col, PosType x, PosType y);
+	std::unordered_set<EntityId> *GetEntitiesIn(PosType x, PosType y);
+	
+	void ForceMoveTo(EntityId entityId, int x, int y);
+	
+public:
 	flecs::world ecs;
+	
+	PosType cameraX=0, cameraY=0;
 	
 	WINDOW *windowMap = nullptr;
 	WINDOW *windowStats = nullptr;

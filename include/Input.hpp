@@ -1,8 +1,10 @@
 #pragma once
 
+#include <flecs.h>
+
 struct ComponentInput
 {
 	int character = 0;
 };
 
-void UpdateComponentInput(ComponentInput &comp);
+void SystemInput(ComponentInput &comp);

@@ -8,7 +8,8 @@ int main()
 	cbreak();
 	noecho();
 	scrollok(stdscr, TRUE);
-	nodelay(stdscr, TRUE);;
+	nodelay(stdscr, TRUE);
+	set_escdelay(0);
 	
 	World world;
 	
@@ -16,7 +17,7 @@ int main()
 	
 	while (world.quit == false) {
 		world.OneEpoch();
-		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		std::this_thread::sleep_for(std::chrono::milliseconds(30));
 	}
 	
 	endwin();
