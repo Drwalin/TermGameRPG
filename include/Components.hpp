@@ -7,8 +7,7 @@
 using PosType = int32_t;
 using EntityId = uint64_t;
 
-struct ComponentPosition
-{
+struct ComponentPosition {
 	PosType x, y;
 };
 
@@ -18,43 +17,37 @@ struct ComponentPosition
  * 2 - has collision but can be only one of this type in one place (characters)
  * 255 - fully blocking collision
  */
-struct ComponentCollision
-{
-	int32_t collisionMode;
+struct ComponentCollision {
+	uint32_t collisionMode;
 };
 
-struct ComponentMovement
-{
+struct ComponentMovement {
 	int64_t movementCooldown;
 	int64_t lastMovementTimestamp;
 };
 
-struct ComponentRender
-{
+struct ComponentRender {
 	int character = '#';
 	Color backgroundColor = BLACK;
 	Color foregroundColor = WHITE;
-	
+
+	bool isBackgroundOnly = false;
 	int64_t lastDisplayedTimestamp = 0;
 };
 
-struct ComponentPlayerMovement
-{
+struct ComponentPlayerMovement {
 	int v;
 };
 
-struct ComponentAIRandomMovement
-{
+struct ComponentAIRandomMovement {
 	int v;
 };
 
-struct ComponentHealth
-{
+struct ComponentHealth {
 	int maxHp;
 	int hp;
 };
 
-struct ComponentCamera
-{
+struct ComponentCamera {
 	bool center = true;
 };

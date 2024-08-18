@@ -2,7 +2,7 @@
 
 #include "../include/World.hpp"
 
-int main() 
+int main()
 {
 	initscr();
 	cbreak();
@@ -10,16 +10,16 @@ int main()
 	scrollok(stdscr, TRUE);
 	nodelay(stdscr, TRUE);
 	set_escdelay(0);
-	
+
 	World world;
-	
+
 	world.Initialize();
-	
+
 	while (world.quit == false) {
 		world.OneEpoch();
-		std::this_thread::sleep_for(std::chrono::milliseconds(30));
+		std::this_thread::sleep_for(std::chrono::milliseconds(25));
 	}
-	
+
 	endwin();
 	return 0;
 }

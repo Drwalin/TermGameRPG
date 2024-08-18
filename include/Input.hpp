@@ -2,8 +2,7 @@
 
 #include <flecs.h>
 
-struct ComponentInput
-{
+struct ComponentInput {
 	int character = 0;
 };
 

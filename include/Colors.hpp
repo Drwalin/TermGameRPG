@@ -2,8 +2,7 @@
 
 #include <cstdint>
 
-enum Color : uint8_t
-{
+enum Color : uint8_t {
 	BLACK = 0,
 	RED = 1,
 	GREEN = 2,
