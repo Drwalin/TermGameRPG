@@ -17,7 +17,7 @@ int main()
 
 	while (world.quit == false) {
 		world.OneEpoch();
-		std::this_thread::sleep_for(std::chrono::milliseconds(25));
+		std::this_thread::sleep_for(std::chrono::milliseconds(50));
 	}
 
 	endwin();

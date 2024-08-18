@@ -66,8 +66,8 @@ void World::SpawnWorld()
 
 	// generate map
 	MapGenerator map;
-	int size = 512;
-	map.Generate(size, size, 0.4, {{5, 2, 13}, {6, 1, 2}});
+	int size = 256;
+	map.Generate(size, size, 0.4, {{5, 2, 13}, {6, 1, 5}});
 
 	for (int _x = 1; _x < size; ++_x) {
 		for (int _y = 1; _y < size; ++_y) {
@@ -130,37 +130,53 @@ void World::Render()
 		for (auto ity = itx->second.lower_bound(cameraY - 1 - h / 2);
 			 ity != endy; ++ity) {
 			const auto &entities = ity->second;
-			EntityId oldest = 0;
-			ComponentRender newRend, oldRend;
-			oldRend.lastDisplayedTimestamp = timer.currentTick + 10000000l;
-			for (auto id : entities) {
-				ComponentRender rend =
-					*flecs::entity(ecs, id).get<ComponentRender>();
-				if (oldRend.lastDisplayedTimestamp >=
-					rend.lastDisplayedTimestamp) {
-					oldRend = rend;
-					oldest = id;
-				}
-				if (newRend.lastDisplayedTimestamp <=
-					rend.lastDisplayedTimestamp) {
-					newRend = rend;
-				}
-			}
 			if (entities.size()) {
+				EntityId newest = 0;
+				EntityId oldest = 0;
+				ComponentRender newRend, oldRend;
+
+				for (auto id : entities) {
+					auto prend = flecs::entity(ecs, id).get<ComponentRender>();
+					if (prend) {
+						auto rend = *prend;
+						if (oldest == 0) {
+							newRend = oldRend = rend;
+							newest = oldest = id;
+						} else if (oldRend.lastDisplayedTimestamp >=
+								   rend.lastDisplayedTimestamp) {
+							oldRend = rend;
+							oldest = id;
+						} else if (newRend.lastDisplayedTimestamp <=
+								   rend.lastDisplayedTimestamp) {
+							newRend = rend;
+							newest = id;
+						}
+					}
+				}
+				
+				if (newest == 0) {
+					continue;
+				}
+				
 				if (entities.size() > 1) {
-					if (newRend.lastDisplayedTimestamp + 400 <
+					if (newRend.lastDisplayedTimestamp + 666 <
 						timer.currentTick) {
 						newRend = oldRend;
+						newest = oldest;
+
 						newRend.lastDisplayedTimestamp = timer.currentTick;
-						flecs::entity(ecs, oldest)
-							.set<ComponentRender>(newRend);
+						flecs::entity(ecs, newest).set(newRend);
 					}
+				} else {
+					newRend.lastDisplayedTimestamp = 50;
+					flecs::entity(ecs, newest).set(newRend);
 				}
 
 				EnableColor(newRend.backgroundColor, newRend.foregroundColor);
 				mvwaddch(windowMap, ity->first - (cameraY - h / 2),
 						 itx->first - (cameraX + -w / 2), newRend.character);
 				DisableColor(newRend.backgroundColor, newRend.foregroundColor);
+				
 			}
 		}
 	}
@@ -211,4 +227,7 @@ void World::ForceMoveTo(EntityId entityId, int x, int y)
 		spatial[x][y].insert(entityId);
 	}
 	entity.set<ComponentPosition>({x, y});
+	if (auto *r = entity.get_mut<ComponentRender>()) {
+		r->lastDisplayedTimestamp = 0;
+	}
 }
