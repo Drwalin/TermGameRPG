@@ -41,12 +41,12 @@ int8_t GetColorPairID(Color background, Color foreground)
 	return (background | (foreground << 3)) + 1;
 }
 
-void EnableColor(Color background, Color foreground)
+void EnableColor(void *win, Color background, Color foreground)
 {
-	attron(COLOR_PAIR(GetColorPairID(background, foreground)));
+	wattron((WINDOW*)win, COLOR_PAIR(GetColorPairID(background, foreground)));
 }
 
-void DisableColor(Color background, Color foreground)
+void DisableColor(void *win, Color background, Color foreground)
 {
-	attroff(COLOR_PAIR(GetColorPairID(background, foreground)));
+	wattroff((WINDOW*)win, COLOR_PAIR(GetColorPairID(background, foreground)));
 }

@@ -17,5 +17,5 @@ void InitColors();
 
 int8_t GetColorPairID(Color backgroun, Color foreground);
 
-void EnableColor(Color backgroun, Color foreground);
-void DisableColor(Color backgroun, Color foreground);
+void EnableColor(void *win, Color backgroun, Color foreground);
+void DisableColor(void *win, Color backgroun, Color foreground);

@@ -89,6 +89,8 @@ void World::SpawnWorld()
 	std::uniform_int_distribution posDist(-1000, 1000);
 	static const char chars[] = ",.;:'\"`";
 	std::uniform_int_distribution charDist(0, 6);
+	static const Color colors[] = {GREEN, YELLOW, RED,	GREEN,
+								   GREEN, GREEN,  GREEN};
 	for (int i = 0; i < 100000; ++i) {
 		int x, y;
 		do {
@@ -96,9 +98,10 @@ void World::SpawnWorld()
 			y = posDist(mt);
 		} while (spatial[x][y].size() != 0);
 		char c = chars[charDist(mt)];
+		Color color = colors[charDist(mt)];
 		auto e =
 			ecs.entity().set<ComponentPosition>({x, y}).set<ComponentRender>(
-				{c, BLACK, WHITE, true});
+				{c, BLACK, color, true});
 		ForceMoveTo(e.id(), x, y);
 	}
 }
@@ -130,54 +133,55 @@ void World::Render()
 		for (auto ity = itx->second.lower_bound(cameraY - 1 - h / 2);
 			 ity != endy; ++ity) {
 			const auto &entities = ity->second;
-			if (entities.size()) {
-				EntityId newest = 0;
-				EntityId oldest = 0;
-				ComponentRender newRend, oldRend;
+			if (entities.size() == 0) {
+				continue;
+			}
+			EntityId newest = 0;
+			EntityId oldest = 0;
+			ComponentRender newRend, oldRend;
 
-				for (auto id : entities) {
-					auto prend = flecs::entity(ecs, id).get<ComponentRender>();
-					if (prend) {
-						auto rend = *prend;
-						if (oldest == 0) {
-							newRend = oldRend = rend;
-							newest = oldest = id;
-						} else if (oldRend.lastDisplayedTimestamp >=
-								   rend.lastDisplayedTimestamp) {
-							oldRend = rend;
-							oldest = id;
-						} else if (newRend.lastDisplayedTimestamp <=
-								   rend.lastDisplayedTimestamp) {
-							newRend = rend;
-							newest = id;
-						}
+			for (auto id : entities) {
+				auto prend = flecs::entity(ecs, id).get<ComponentRender>();
+				if (prend) {
+					auto rend = *prend;
+					if (oldest == 0) {
+						newRend = oldRend = rend;
+						newest = oldest = id;
+					} else if (oldRend.lastDisplayedTimestamp >=
+							   rend.lastDisplayedTimestamp) {
+						oldRend = rend;
+						oldest = id;
+					} else if (newRend.lastDisplayedTimestamp <=
+							   rend.lastDisplayedTimestamp) {
+						newRend = rend;
+						newest = id;
 					}
 				}
-				
-				if (newest == 0) {
-					continue;
-				}
-				
-				if (entities.size() > 1) {
-					if (newRend.lastDisplayedTimestamp + 666 <
-						timer.currentTick) {
-						newRend = oldRend;
-						newest = oldest;
+			}
 
-						newRend.lastDisplayedTimestamp = timer.currentTick;
-						flecs::entity(ecs, newest).set(newRend);
-					}
-				} else {
-					newRend.lastDisplayedTimestamp = 50;
+			if (newest == 0) {
+				continue;
+			}
+
+			if (newest != oldest) {
+				if (newRend.lastDisplayedTimestamp + 666 < timer.currentTick) {
+					newRend = oldRend;
+					newest = oldest;
+
+					newRend.lastDisplayedTimestamp = timer.currentTick;
 					flecs::entity(ecs, newest).set(newRend);
 				}
-
-				EnableColor(newRend.backgroundColor, newRend.foregroundColor);
-				mvwaddch(windowMap, ity->first - (cameraY - h / 2),
-						 itx->first - (cameraX + -w / 2), newRend.character);
-				DisableColor(newRend.backgroundColor, newRend.foregroundColor);
-				
+			} else if (newRend.lastDisplayedTimestamp != 50) {
+				newRend.lastDisplayedTimestamp = 50;
+				flecs::entity(ecs, newest).set(newRend);
 			}
+
+			EnableColor(windowMap, newRend.backgroundColor,
+						newRend.foregroundColor);
+			mvwaddch(windowMap, ity->first - (cameraY - h / 2),
+					 itx->first - (cameraX + -w / 2), newRend.character);
+			DisableColor(windowMap, newRend.backgroundColor,
+						 newRend.foregroundColor);
 		}
 	}
 	wprintw(windowTopStats, " %lli fps", c * 1000ll / (timer.currentTick + 1));
@@ -228,6 +232,8 @@ void World::ForceMoveTo(EntityId entityId, int x, int y)
 	}
 	entity.set<ComponentPosition>({x, y});
 	if (auto *r = entity.get_mut<ComponentRender>()) {
-		r->lastDisplayedTimestamp = 0;
+		if (r->lastDisplayedTimestamp == 50) {
+			r->lastDisplayedTimestamp = timer.currentTick;
+		}
 	}
 }

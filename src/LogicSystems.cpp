@@ -49,8 +49,6 @@ void SystemCameraUpdate(flecs::entity entity, const ComponentCamera &,
 		world->cameraY = pos.y;
 	}
 	
-	
-	
 	world->cameraX = pos.x;
 	world->cameraY = pos.y;
 }
